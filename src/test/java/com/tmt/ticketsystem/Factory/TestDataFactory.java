@@ -54,21 +54,11 @@ public class TestDataFactory {
     // ===== UserDto Builders =====
 
     public static UserDto buildTestUserDto() {
-        UserDto dto = new UserDto();
-        dto.setId(1);
-        dto.setUserName("test_user");
-        dto.setPassword("password123");
-        dto.setRole(Roles.USER);
-        return dto;
+        return new UserDto(1, "test_user", Roles.USER, "password123", null);
     }
 
     public static UserDto buildAdminUserDto() {
-        UserDto dto = new UserDto();
-        dto.setId(2);
-        dto.setUserName("admin_user");
-        dto.setPassword("admin123");
-        dto.setRole(Roles.ADMIN);
-        return dto;
+        return new UserDto(2, "admin_user", Roles.ADMIN, "admin123", null);
     }
 
     public static List<UserDto> buildUserDtoList() {
@@ -78,24 +68,15 @@ public class TestDataFactory {
     // ===== LoginDto Builders =====
 
     public static LoginDto buildValidLoginDto() {
-        LoginDto dto = new LoginDto();
-        dto.setUserName("test_user");
-        dto.setPassword("password123");
-        return dto;
+        return new LoginDto("test_user", "password123");
     }
 
     public static LoginDto buildInvalidPasswordLoginDto() {
-        LoginDto dto = new LoginDto();
-        dto.setUserName("test_user");
-        dto.setPassword("wrong_password");
-        return dto;
+        return new LoginDto("test_user", "wrong_password");
     }
 
     public static LoginDto buildNonExistentUserLoginDto() {
-        LoginDto dto = new LoginDto();
-        dto.setUserName("unknown_user");
-        dto.setPassword("password123");
-        return dto;
+        return new LoginDto("unknown_user", "password123");
     }
 
     // ===== LoginResponse Builders =====
@@ -104,6 +85,14 @@ public class TestDataFactory {
         LoginResponse response = new LoginResponse();
         response.setUserName("test_user");
         response.setRole(Roles.USER);
+        return response;
+    }
+
+    public static LoginResponse buildLoginResponse(LoginMessage message, Roles role, String userName) {
+        LoginResponse response = new LoginResponse();
+        response.setMessage(message);
+        response.setRole(role);
+        response.setUserName(userName);
         return response;
     }
 
@@ -187,25 +176,24 @@ public class TestDataFactory {
     // ===== TicketDto Builders =====
 
     public static TicketDto buildTestTicketDto() {
-        TicketDto dto = new TicketDto();
-        dto.setId(1L);
-        dto.setTicketId("Har_Lap_2026-03-04_12345678");
-        dto.setCategory("Hardware");
-        dto.setSubCategory("Laptop");
-        dto.setComments("Screen not working");
-        dto.setTicketPriority("High");
-        dto.setDate("2026-03-04T08:00:00");
-        dto.setStatus(TicketStatus.SOLVED.getStatus());
-        dto.setRaisedBy("test_user");
-        dto.setTicketInfo("Broken screen");
-        dto.setAssignee("admin_user");
-        return dto;
+        return new TicketDto(
+                1L,
+                "Har_Lap_2026-03-04_12345678",
+                "Hardware",        "Laptop",
+                "Screen not working",
+                "High",
+                "2026-03-04T08:00:00",
+                TicketStatus.SOLVED.getStatus(),
+                "test_user",
+                "Broken screen        "admin_user"
+        );
     }
 
     public static TicketDto buildTicketDtoWithNewAssignee() {
-        TicketDto dto = new TicketDto();
-        dto.setAssignee("new_assignee");
-        return dto;
+        return new TicketDto(
+                null, null, null, null, null, null, null, null, null, null,
+                "new_assignee"
+        );
     }
 
     // ===== DeleteResponse Builders =====

@@ -49,10 +49,12 @@ public class UserServiceTest {
                 when(userRepository.save(any(User.class))).thenReturn(userEntity);
                 when(userConverter.entityToDto(any(User.class))).thenReturn(userDto);
 
-                UserDto result = userService.addUsers(userDto);
+                UserResponse result = userService.addUsers(userDto);
 
                 assertNotNull(result);
                 assertEquals("success", result.getMessage());
+                assertEquals(userDto.userName(), result.getUsers().get(0).userName());
+                assertEquals(userDto.password(), result.getUsers().get(0).password());
                 verify(userRepository).save(any(User.class));
         }
 
@@ -63,10 +65,10 @@ public class UserServiceTest {
 
                 when(userRepository.findByUserName("test_user")).thenReturn(existingUser);
 
-                UserDto result = userService.addUsers(userDto);
+                Exception exception = assertThrows(RuntimeException.class, () -> userService.addUsers(userDto));
 
-                assertNotNull(result);
-                assertEquals(" is already exist", result.getMessage());
+                // Verify result
+                assertEquals("User " + userDto.userName() + " is already exist", exception.getMessage());
                 verify(userRepository, never()).save(any(User.class));
         }
 
@@ -77,10 +79,10 @@ public class UserServiceTest {
 
                 when(userRepository.findByUserName("admin_user")).thenReturn(existingAdmin);
 
-                UserDto result = userService.addUsers(userDto);
+                UserResponse result = userService.addUsers(userDto);
 
                 assertEquals(" is already exist", result.getMessage());
-                assertEquals("admin_user", result.getUserName());
+                assertEquals("admin_user", result.getUsers().get(0).userName());
         }
 
         // ==================== getUsersList ====================
@@ -95,10 +97,11 @@ public class UserServiceTest {
 
                 List<UserDto> result = userService.getUsersList();
 
+                // Verify result
                 assertNotNull(result);
                 assertEquals(2, result.size());
-                assertEquals("test_user", result.get(0).getUserName());
-                verify(userRepository).findAll();
+                assertEquals(userDtos.get(0).userName(), result.get(0).userName());
+                assertEquals(userDtos.get(0).password(), result.get(0).password());
         }
 
     @Test

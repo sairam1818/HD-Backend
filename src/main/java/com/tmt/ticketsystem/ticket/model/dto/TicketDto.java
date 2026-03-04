@@ -1,18 +1,15 @@
 package com.tmt.ticketsystem.ticket.model.dto;
 
-import lombok.Data;
-
-@Data
-public class TicketDto {
-    private Long id;
-    private String ticketId;
-    private String category;
-    private String subCategory;
-    private String comments;
-    private String ticketPriority;
-    private String date;
-    private String status;
-    private String raisedBy;
-    private String ticketInfo;
-    private String assignee;
+public record TicketDto(
+        Long id,
+        String ticketId,
+        String category,
+        String subCategory,
+        String comments,
+        String ticketPriority,
+        String date,
+        String status,
+        String raisedBy,
+        String ticketInfo,
+        String assignee) {
 }

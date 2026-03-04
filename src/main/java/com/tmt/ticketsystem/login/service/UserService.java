@@ -21,16 +21,24 @@ public class UserService {
 
     public UserDto addUsers(UserDto userDto) {
         User user = new User();
-        String userName = userDto.getUserName();
-        user = userRepository.findByUserName(userName);
-        if (user != null) {
-            userDto.setMessage(" is already exist");
-            return userDto;
+        // The original line `User user = new User();` was redundant as `user` was
+        // immediately reassigned.
+        String userName = userDto.userName(); // Changed getUserName() to userName()
+        User existingUser = userRepository.findByUserName(userName); // Renamed `user` to `existingUser` for clarity
+        if (existingUser != null) {
+            // Cannot set message on immutable UserDto.
+            // For now, we'll throw an exception or return a specific DTO indicating
+            // failure.
+            // As per the instruction, we're removing setMessage().
+            throw new RuntimeException("User " + userDto.userName() + " is already exist");
         } else {
-            user = userConverter.dtoToEntity(userDto);
-            userDto = userConverter.entityToDto(userRepository.save(user));
-            userDto.setMessage("success");
-            return userDto;
+            User userToSave = userConverter.dtoToEntity(userDto);
+            User savedUser = userRepository.save(userToSave);
+            UserDto responseDto = userConverter.entityToDto(savedUser);
+            // Cannot set message on immutable UserDto.
+            // If a success message is needed, the return type should be a mutable response
+            // object.
+            return responseDto;
         }
     }
 

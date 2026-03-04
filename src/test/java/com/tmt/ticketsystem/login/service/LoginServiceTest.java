@@ -44,10 +44,7 @@ public class LoginServiceTest {
 
     @Test
     void login_ShouldReturnSuccessWithAdminRole_WhenAdminLogsIn() {
-        LoginDto loginDto = new LoginDto();
-        loginDto.setUserName("admin_user");
-        loginDto.setPassword("admin123");
-
+        LoginDto loginDto = new LoginDto("admin_user", "admin123");
         User admin = TestDataFactory.buildAdminUserEntity();
 
         when(userRepository.findByUserName("admin_user")).thenReturn(admin);
@@ -61,9 +58,7 @@ public class LoginServiceTest {
 
     @Test
     void login_ShouldReturnSuccessWithSuperAdminRole_WhenSuperAdminLogsIn() {
-        LoginDto loginDto = new LoginDto();
-        loginDto.setUserName("super_admin");
-        loginDto.setPassword("super123");
+        LoginDto loginDto = new LoginDto("super_admin", "super123");
 
         User superAdmin = TestDataFactory.buildSuperAdminUserEntity();
 
@@ -110,9 +105,7 @@ public class LoginServiceTest {
 
     @Test
     void login_ShouldReturnUserNotFound_WhenUsernameIsEmpty() {
-        LoginDto loginDto = new LoginDto();
-        loginDto.setUserName("");
-        loginDto.setPassword("password123");
+        LoginDto loginDto = new LoginDto("", "password123");
 
         when(userRepository.findByUserName("")).thenReturn(null);
 
@@ -123,9 +116,7 @@ public class LoginServiceTest {
 
     @Test
     void login_ShouldReturnInvalidCredentials_WhenPasswordIsEmpty() {
-        LoginDto loginDto = new LoginDto();
-        loginDto.setUserName("test_user");
-        loginDto.setPassword("");
+        LoginDto loginDto = new LoginDto("test_user", "");
 
         User user = TestDataFactory.buildTestUserEntity();
         when(userRepository.findByUserName("test_user")).thenReturn(user);

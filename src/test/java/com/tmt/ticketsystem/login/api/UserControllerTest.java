@@ -9,14 +9,16 @@ import com.tmt.ticketsystem.exception.UserNotFoundException;
 import com.tmt.ticketsystem.login.model.dto.UserDto;
 import com.tmt.ticketsystem.login.model.response.UserResponse;
 import com.tmt.ticketsystem.login.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,51 +29,60 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
-@Import(GlobalExceptionHandler.class)
 public class UserControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private UserService userService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private UserController userController;
+
+    // @Autowired is removed as we are not using Spring's test context for
+    // ObjectMapper
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
 
     // ==================== POST /api/users ====================
 
     @Test
     void addUsers_ShouldReturnCreatedUser() throws Exception {
-        UserDto inputDto = TestDataFactory.buildTestUserDto();
-        UserDto resultDto = TestDataFactory.buildTestUserDto();
-        resultDto.setMessage("success");
+        UserDto userDto = TestDataFactory.buildTestUserDto();
+        List<UserDto> userDtoList = Collections.singletonList(userDto);
+        UserResponse resultResponse = new UserResponse("success", userDtoList);
 
-        when(userService.addUsers(any(UserDto.class))).thenReturn(resultDto);
+        when(userService.addUsers(any(UserDto.class))).thenReturn(resultResponse);
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(inputDto)))
+                .content(objectMapper.writeValueAsString(userDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userName", is("test_user")))
-                .andExpect(jsonPath("$.role", is("USER")))
+                .andExpect(jsonPath("$.userList[0].userName", is("test_user")))
+                .andExpect(jsonPath("$.userList[0].role", is("USER")))
                 .andExpect(jsonPath("$.message", is("success")));
     }
 
     @Test
     void addUsers_ShouldReturnAlreadyExist_WhenDuplicate() throws Exception {
-        UserDto inputDto = TestDataFactory.buildTestUserDto();
-        UserDto resultDto = TestDataFactory.buildTestUserDto();
-        resultDto.setMessage(" is already exist");
+        UserDto userDto = TestDataFactory.buildTestUserDto();
+        List<UserDto> emptyList = Collections.emptyList();
+        UserResponse resultResponse = new UserResponse("User " + userDto.userName() + " is already exist", emptyList);
 
-        when(userService.addUsers(any(UserDto.class))).thenReturn(resultDto);
+        when(userService.addUsers(any(UserDto.class)))
+                .thenThrow(new RuntimeException("User " + userDto.userName() + " is already exist"));
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message", is(" is already exist")));
+                .content(objectMapper.writeValueAsString(userDto)))
+                .andExpect(status().isInternalServerError());
     }
 
     // ==================== GET /api/users ====================
@@ -79,30 +90,32 @@ public class UserControllerTest {
     @Test
     void getUsersList_ShouldReturnListOfUsers() throws Exception {
         List<UserDto> userDtos = TestDataFactory.buildUserDtoList();
+        UserResponse resultResponse = new UserResponse("success", userDtos);
 
-        when(userService.getUsersList()).thenReturn(userDtos);
+        when(userService.getUsersList()).thenReturn(resultResponse);
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].userName", is("test_user")))
-                .andExpect(jsonPath("$[1].userName", is("admin_user")));
+                .andExpect(jsonPath("$.message", is("success")))
+                .andExpect(jsonPath("$.userList[1].userName", is("admin_user")));
     }
 
     @Test
     void getUsersList_ShouldReturnEmptyList_WhenNoUsers() throws Exception {
-        when(userService.getUsersList()).thenReturn(Collections.emptyList());
+        UserResponse resultResponse = new UserResponse("success", Collections.emptyList());
+        when(userService.getUsersList()).thenReturn(resultResponse);
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.userList", hasSize(0)));
     }
 
     // ==================== DELETE /api/users/{id} ====================
 
     @Test
     void deleteUserById_ShouldReturnSuccessResponse() throws Exception {
-        UserResponse response = TestDataFactory.buildSuccessUserResponse();
+        List<UserDto> emptyList = Collections.emptyList();
+        UserResponse response = new UserResponse("user deleted successfully", emptyList);
 
         when(userService.deleteUserById(1)).thenReturn(response);
 

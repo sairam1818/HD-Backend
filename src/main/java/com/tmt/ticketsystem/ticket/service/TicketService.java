@@ -23,7 +23,8 @@ public class TicketService {
         ticket.setStatus(TicketStatus.In_Progress.getStatus());
         Random random = new Random();
         int randomNumber = random.nextInt(90000000);
-        ticket.setTicketId(generateTicketId(ticket.getCategory()) + "_" + generateTicketId(ticket.getSubCategory()) + "_" + ticket.getDate().substring(0,10)+ "_" + randomNumber);
+        ticket.setTicketId(generateTicketId(ticket.getCategory()) + "_" + generateTicketId(ticket.getSubCategory())
+                + "_" + ticket.getDate().substring(0, 10) + "_" + randomNumber);
         return ticketRepository.save(ticket);
     }
 
@@ -74,13 +75,14 @@ public class TicketService {
                 throw new TicketNotFoundException("Ticket withdrawal failed" + ticketId);
             }
             return deleteResponse;
-        } else throw new TicketNotFoundException("Ticket not found: " + ticketId);
+        } else
+            throw new TicketNotFoundException("Ticket not found: " + ticketId);
     }
 
     public Ticket updateTicket(String ticketId, TicketDto ticketDto) {
         Optional<Ticket> optionalTicket = Optional.ofNullable(ticketRepository.findByTicketId(ticketId));
         if (optionalTicket.isPresent()) {
-            optionalTicket.get().setAssignee(ticketDto.getAssignee());
+            optionalTicket.get().setAssignee(ticketDto.assignee());
             return ticketRepository.save(optionalTicket.get());
         } else {
             throw new TicketNotFoundException("Ticket not found");

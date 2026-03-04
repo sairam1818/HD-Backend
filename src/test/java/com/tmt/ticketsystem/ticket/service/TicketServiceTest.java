@@ -123,9 +123,8 @@ public class TicketServiceTest {
         void addTickets_WithMixedLengthCategories_ShouldHandleBothBranches() {
             Ticket ticket = new Ticket();
             ticket.setCategory("Software"); // >3 → "Sof"
-            ticket.setSubCategory("DB"); // <=3 → "DB"
-            ticket.setDate("2026-12-25T00:00:00");
-
+            ticket.setSubCategory("DB"); // <=3 
+                    ticket.setDate("2026-12-25T00:00:00");
             when(ticketRepository.save(any(Ticket.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             Ticket result = ticketService.addTickets(ticket);

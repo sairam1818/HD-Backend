@@ -58,10 +58,10 @@ public class UserConverterTest {
         UserDto result = userConverter.entityToDto(user);
 
         assertNotNull(result);
-        assertEquals(10, result.getId());
-        assertNull(result.getUserName());
-        assertNull(result.getPassword());
-        assertNull(result.getRole());
+        assertEquals(10, result.id());
+        assertNull(result.userName());
+        assertNull(result.password());
+        assertNull(result.role());
     }
 
     // ==================== entityToDto (list) ====================
@@ -74,9 +74,9 @@ public class UserConverterTest {
 
         assertNotNull(result);
         assertEquals(3, result.size());
-        assertEquals("test_user", result.get(0).getUserName());
-        assertEquals("admin_user", result.get(1).getUserName());
-        assertEquals("super_admin", result.get(2).getUserName());
+        assertEquals("test_user", result.get(0).userName());
+        assertEquals("admin_user", result.get(1).userName());
+        assertEquals("super_admin", result.get(2).userName());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class UserConverterTest {
         List<UserDto> result = userConverter.entityToDto(users);
 
         assertEquals(1, result.size());
-        assertEquals("test_user", result.get(0).getUserName());
+        assertEquals("test_user", result.get(0).userName());
     }
 
     // ==================== dtoToEntity (single) ====================
@@ -114,8 +114,7 @@ public class UserConverterTest {
 
     @Test
     void dtoToEntity_ShouldHandleDtoWithNullFields() {
-        UserDto dto = new UserDto();
-        dto.setId(5);
+        UserDto dto = new UserDto(5, null, null, null, null);
 
         User result = userConverter.dtoToEntity(dto);
 

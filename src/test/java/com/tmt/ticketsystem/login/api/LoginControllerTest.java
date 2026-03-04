@@ -88,16 +88,11 @@ public class LoginControllerTest {
 
     @Test
     void login_ShouldReturn200WithAdminRole_WhenAdminLogsIn() throws Exception {
-        LoginDto loginDto = new LoginDto();
-        loginDto.setUserName("admin_user");
-        loginDto.setPassword("admin123");
+        LoginDto loginDto = new LoginDto("admin_user", "admin123");
+        LoginResponse loginResponse = TestDataFactory.buildLoginResponse(LoginMessage.LOGGED_IN_SUCCESS, Roles.ADMIN,
+                "admin_user");
 
-        LoginResponse response = new LoginResponse();
-        response.setMessage(LoginMessage.LOGGED_IN_SUCCESS);
-        response.setRole(Roles.ADMIN);
-        response.setUserName("admin_user");
-
-        when(loginService.login(any(LoginDto.class))).thenReturn(response);
+        when(loginService.login(any(LoginDto.class))).thenReturn(loginResponse);
 
         mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
